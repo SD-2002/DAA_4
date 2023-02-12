@@ -1,0 +1,127 @@
+// =============================================================================
+//    Author: K Perkins
+//    Date:   Nov 2, 2013
+//    Taken From: http://programmingnotes.org/
+//    File:  Project2.h
+//    Description: This is a simple class which holds the functions for 
+//       project 2
+// =============================================================================
+#ifndef PROJECT2_H
+#define PROJECT2_H
+
+#include <iostream>
+#include <vector>
+#include <string>
+using std::vector;
+using std::string;
+
+// structure to hold the items contained in the file
+struct PackageStats
+{
+	string name;
+	int votes;
+	int size;
+};
+
+class Project2
+{
+public:
+	Project2(){}
+	vector<PackageStats> ExhaustiveKnapsack(vector<PackageStats>& packages, int weight)
+	{	
+		vector<PackageStats> best;	
+		int* subsets = new int[packages.size()];		
+		int bestVote = 0;
+
+		// generate subsets (2^n possibilities)
+		for(unsigned x=0; x < (unsigned)(1 << (int)packages.size()); ++x)
+		{	
+			int index = 0;	
+			int totalSize = 0;
+			int totalVotes = 0;
+			
+			// generate subsets using binary digits
+			for(unsigned y=0; y < packages.size(); ++y)
+			{
+				if(((x >> y) & 1) == 1)
+				{
+					subsets[index++] = y;
+					totalSize += packages.at(y).size;
+					totalVotes += packages.at(y).votes;
+				}
+			}
+			// find the best combination of subsets
+			if((totalSize <= weight) && (best.empty() || (totalVotes > bestVote)))
+			{	
+				bestVote = totalVotes;
+				best = ReturnBest(packages, subsets, index);
+			}			
+		}
+		delete[] subsets;
+		return best;
+	}// end of ExhaustiveKnapsack
+
+	int TotalSize(vector<PackageStats>& packages, vector<int> s = vector<int>())
+	{
+		int total = 0;
+
+		// if theres 2 parameters
+		if(!s.empty())
+		{
+			for(unsigned x=0; x < s.size(); ++x)
+			{
+				total += packages.at(s.at(x)).size;
+			}
+		}
+		else // if theres only 1
+		{
+			for(unsigned x=0; x < packages.size(); ++x)
+			{
+				total += packages.at(x).size;
+			}
+		}
+		return total;
+	}// end of TotalSize
+
+	int TotalVotes(vector<PackageStats>& packages, vector<int> s = vector<int>())
+	{
+		int total = 0;
+
+		// if theres 2 parameters
+		if(!s.empty())
+		{
+			for(unsigned x=0; x < s.size(); ++x)
+			{
+				total += packages.at(s.at(x)).votes;
+			}
+		}
+		else // if theres only 1
+		{
+			for(unsigned x=0; x < packages.size(); ++x)
+			{
+				total += packages.at(x).votes;
+			}
+		}
+		return total;
+	}// end of TotalVotes
+
+	vector<PackageStats> ReturnBest(vector<PackageStats>& packages, int subsets[], int size)
+	{
+		vector<PackageStats> best;
+		for(int x=0; x < size; ++x)
+		{
+			best.push_back(packages.at(subsets[x]));
+		}
+		return best;
+	}// end of ReturnBest
+	
+	void Display(vector<PackageStats>& packages, unsigned size)
+	{
+		for(unsigned x=0; x < size && x < packages.size(); ++x)
+		{
+			std::cout<<packages.at(x).name<<" "
+			     <<packages.at(x).size<<" "<<packages.at(x).votes<<std::endl;
+		}
+	}// end of Display	
+	~Project2(){}
+};
